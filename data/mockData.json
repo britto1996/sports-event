@@ -1,0 +1,104 @@
+{
+  "events": [
+    {
+      "id": "match-001",
+      "title": "FC Barcelona vs Real Madrid",
+      "competition": "La Liga",
+      "date": "2026-03-24T20:00:00Z",
+      "venue": "Spotify Camp Nou",
+      "status": "Upcoming",
+      "homeTeam": {
+        "name": "FC Barcelona",
+        "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/1200px-FC_Barcelona_%28crest%29.svg.png",
+        "score": 0
+      },
+      "awayTeam": {
+        "name": "Real Madrid",
+        "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/1200px-Real_Madrid_CF.svg.png",
+        "score": 0
+      },
+      "ticketsAvailable": true,
+      "ticketPriceStart": 120
+    },
+    {
+      "id": "match-002",
+      "title": "Manchester City vs Arsenal",
+      "competition": "Premier League",
+      "date": "2026-03-21T15:00:00Z",
+      "venue": "Etihad Stadium",
+      "status": "Live",
+      "liveRobust": true,
+      "homeTeam": {
+        "name": "Manchester City",
+        "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/1200px-Manchester_City_FC_badge.svg.png",
+        "score": 2
+      },
+      "awayTeam": {
+        "name": "Arsenal",
+        "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/1200px-Arsenal_FC.svg.png",
+        "score": 1
+      },
+      "minute": "78'",
+      "possession": { "home": 58, "away": 42 },
+      "shots": { "home": 12, "away": 8 }
+    },
+    {
+      "id": "match-003",
+      "title": "PSG vs Bayern Munich",
+      "competition": "Champions League",
+      "date": "2026-03-18T19:45:00Z",
+      "venue": "Parc des Princes",
+      "status": "Finished",
+      "homeTeam": {
+        "name": "PSG",
+        "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/1200px-Paris_Saint-Germain_F.C..svg.png",
+        "score": 1
+      },
+      "awayTeam": {
+        "name": "Bayern Munich",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1200px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png",
+        "score": 3
+      },
+      "highlightsUrl": "#"
+    }
+  ],
+  "news": [
+    {
+      "id": "news-001",
+      "title": "Star Striker Returns for El Clásico",
+      "summary": "Fans rejoice as the top goal scorer is cleared to play in the upcoming derby against Real Madrid.",
+      "image": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&q=80&w=800",
+      "date": "2026-03-20"
+    },
+    {
+      "id": "news-002",
+      "title": "New AI Integrations for Fan Engagement",
+      "summary": "La Cima Studios announces groundbreaking AI features for the official app, enhancing match-day experience.",
+      "image": "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&q=80&w=800",
+      "date": "2026-03-19"
+    },
+    {
+      "id": "news-003",
+      "title": "Stadium Upgrades Complete Ahead of Finals",
+      "summary": "The newly renovated stands offer improved seating and connectivity for over 80,000 spectators.",
+      "image": "https://images.unsplash.com/photo-1522778119026-d647f0565c6a?auto=format&fit=crop&q=80&w=800",
+      "date": "2026-03-18"
+    }
+  ],
+  "tickets": [
+    { "type": "Standard", "price": 120, "benefits": ["Seat selection", "Standard Entry", "Good View"], "available": 450 },
+    { "type": "Premium", "price": 250, "benefits": ["Better views", "Fast Track Entry", "Lounge Access"], "available": 120 },
+    { "type": "VIP Box", "price": 1500, "benefits": ["Private Suite", "Catering Included", "Meet & Greet option"], "available": 5 }
+  ],
+  "aiChat": {
+    "initialMessages": [
+      { "id": 1, "sender": "bot", "text": "Hi! I'm your La Cima match assistant. Ask me about stats, tickets, or player info!" }
+    ],
+    "suggestedPrompts": [
+      "Where can I buy tickets?",
+      "Who is top scorer?",
+      "Show live stats",
+      "Navigate to seat map"
+    ]
+  }
+}
