@@ -5,7 +5,8 @@ import SeatMap, { type SeatCategory, type SeatSelection } from './SeatMap';
 import mockDataRaw from '@/data/mockData.json';
 import type { MatchEvent, MockData, TicketTier } from '@/types/mockData';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/AuthProvider';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { cartEventSeatsSet } from '@/lib/store/cartSlice';
 
 const mockData = mockDataRaw as MockData;
 
@@ -15,8 +16,9 @@ interface EventBookingProps {
 
 export default function EventBooking({ event }: EventBookingProps) {
     const router = useRouter();
-    const { status } = useAuth();
-    const isAuthed = status === 'authenticated';
+    const dispatch = useAppDispatch();
+    const auth = useAppSelector((s) => s.auth);
+    const isAuthed = auth.status === 'authenticated' && !!auth.token;
 
     const tiers = mockData.tickets;
     const defaultTier = tiers.find((t) => t.type === 'Standard') ?? tiers[0];
@@ -26,6 +28,14 @@ export default function EventBooking({ event }: EventBookingProps) {
 
     const handleSelectionChange = (seats: SeatSelection[]) => {
         setSelectedSeats(seats);
+        dispatch(
+            cartEventSeatsSet({
+                eventId: event.id,
+                eventTitle: event.title,
+                tierType: selectedTier.type,
+                seats,
+            })
+        );
     };
 
     const redirectToLogin = () => {
@@ -82,6 +92,14 @@ export default function EventBooking({ event }: EventBookingProps) {
                                 onClick={() => {
                                     setSelectedTier(tier);
                                     setSelectedSeats([]);
+                                    dispatch(
+                                        cartEventSeatsSet({
+                                            eventId: event.id,
+                                            eventTitle: event.title,
+                                            tierType: tier.type,
+                                            seats: [],
+                                        })
+                                    );
                                 }}
                                 className="btn btn-secondary"
                                 style={{

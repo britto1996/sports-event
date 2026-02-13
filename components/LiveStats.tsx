@@ -16,7 +16,24 @@ const LiveStats = ({ match }: { match: MatchEvent }) => {
             <div className="stats-header">
                 <div className="team-stat-block">
                     <div style={{ position: 'relative', width: 80, height: 80, margin: '0 auto 0.5rem' }}>
-                        <Image src={match.homeTeam.logo} alt={match.homeTeam.name} fill className="object-contain" style={{ objectFit: 'contain' }} />
+                        {match.homeTeam.logo ? (
+                            <Image src={match.homeTeam.logo} alt={match.homeTeam.name} fill className="object-contain" style={{ objectFit: 'contain' }} />
+                        ) : (
+                            <div
+                                aria-hidden="true"
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    display: 'grid',
+                                    placeItems: 'center',
+                                    background: 'var(--surface-1)',
+                                    color: 'var(--foreground)',
+                                    fontWeight: 900,
+                                }}
+                            >
+                                {(match.homeTeam.name?.[0] ?? 'H').toUpperCase()}
+                            </div>
+                        )}
                     </div>
                     <h3>{match.homeTeam.name}</h3>
                 </div>
@@ -30,7 +47,24 @@ const LiveStats = ({ match }: { match: MatchEvent }) => {
 
                 <div className="team-stat-block">
                     <div style={{ position: 'relative', width: 80, height: 80, margin: '0 auto 0.5rem' }}>
-                        <Image src={match.awayTeam.logo} alt={match.awayTeam.name} fill className="object-contain" style={{ objectFit: 'contain' }} />
+                        {match.awayTeam.logo ? (
+                            <Image src={match.awayTeam.logo} alt={match.awayTeam.name} fill className="object-contain" style={{ objectFit: 'contain' }} />
+                        ) : (
+                            <div
+                                aria-hidden="true"
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    display: 'grid',
+                                    placeItems: 'center',
+                                    background: 'var(--surface-1)',
+                                    color: 'var(--foreground)',
+                                    fontWeight: 900,
+                                }}
+                            >
+                                {(match.awayTeam.name?.[0] ?? 'A').toUpperCase()}
+                            </div>
+                        )}
                     </div>
                     <h3>{match.awayTeam.name}</h3>
                 </div>

@@ -3,9 +3,12 @@
 import { links } from "@/constants/path";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/components/AuthProvider";
+import { useEffect, useMemo, useRef, useState } from "react";
 import EventSearchPanel from "@/components/EventSearchPanel";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { logoutRequested } from "@/lib/store/authSlice";
+import { AUTH_EMAIL_KEY } from "@/lib/authStorage";
+import { selectCartItemCount } from "@/lib/store/cartSlice";
 
 type ThemeMode = "dark" | "light";
 
@@ -25,15 +28,27 @@ const getInitialTheme = (): ThemeMode => {
 const Navbar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const pathname = usePathname() ?? links.home;
-  const { status, user, logout } = useAuth();
-  const isAuthed = status === "authenticated" && !!user;
+  const dispatch = useAppDispatch();
+  const auth = useAppSelector((s) => s.auth);
+  const cartCount = useAppSelector(selectCartItemCount);
+  const isAuthed = auth.status === "authenticated" && !!auth.token;
+  const popoverRef = useRef<HTMLDivElement | null>(null);
 
-  const getInitials = (name: string) => {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    const first = parts[0]?.[0] ?? "U";
-    const second = parts.length > 1 ? parts[parts.length - 1]?.[0] : "";
-    return (first + second).toUpperCase();
+  const emailFromStorage = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    const stored = window.localStorage.getItem(AUTH_EMAIL_KEY);
+    return stored && stored.trim() ? stored : null;
+  }, [auth.email, auth.status]);
+
+  const displayEmail = auth.email ?? emailFromStorage;
+
+  const getInitials = (email: string | null) => {
+    const safe = (email ?? "user").trim();
+    const first = safe[0] ?? "U";
+    const second = safe.includes("@") ? safe.split("@")[0]?.[1] : safe[1];
+    return (first + (second ?? "")).toUpperCase();
   };
 
   const isActive = (href: string) => {
@@ -56,6 +71,19 @@ const Navbar = () => {
       document.documentElement.classList.remove("no-scroll");
     };
   }, [drawerOpen, searchOpen]);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    const onDocMouseDown = (e: MouseEvent) => {
+      const node = popoverRef.current;
+      if (!node) return;
+      if (e.target instanceof Node && !node.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, [profileOpen]);
 
   const toggleTheme = () => {
     const current = (
@@ -131,7 +159,14 @@ const Navbar = () => {
             aria-current={isActive(links.tickets) ? "page" : undefined}
             className={isActive(links.tickets) ? "nav-link active-nav-link" : "nav-link"}
           >
-            TICKETS
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+              <span>TICKETS</span>
+              {cartCount > 0 && (
+                <span className="cart-badge" aria-label={`${cartCount} tickets selected`}>
+                  {cartCount}
+                </span>
+              )}
+            </span>
           </Link>
           <Link
             href={links.fanZone}
@@ -282,12 +317,61 @@ const Navbar = () => {
             SEARCH
           </button>
 
-          {isAuthed && user ? (
-            <div className="profile-chip" aria-label={`Logged in as ${user.name}`}>
-              <div className="profile-avatar" aria-hidden="true">
-                {getInitials(user.name)}
-              </div>
-              <div className="profile-name">{user.name}</div>
+          {isAuthed ? (
+            <div ref={popoverRef} style={{ position: "relative" }}>
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label="Account"
+                aria-expanded={profileOpen}
+                onClick={() => setProfileOpen((v) => !v)}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 999,
+                  border: "1px solid var(--border-subtle)",
+                  display: "grid",
+                  placeItems: "center",
+                  fontWeight: 900,
+                }}
+              >
+                {getInitials(displayEmail)}
+              </button>
+
+              {profileOpen && (
+                <div
+                  className="card"
+                  role="dialog"
+                  aria-label="Account menu"
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    top: "calc(100% + 10px)",
+                    width: 260,
+                    padding: "1rem",
+                    border: "1px solid var(--border-subtle)",
+                    background: "var(--surface-1)",
+                    zIndex: 50,
+                  }}
+                >
+                  <p style={{ fontWeight: 900, letterSpacing: "1px", textTransform: "uppercase", fontSize: "0.75rem", color: "var(--muted)", marginBottom: "0.5rem" }}>
+                    Signed in as
+                  </p>
+                  <p style={{ fontWeight: 900, marginBottom: "1rem", wordBreak: "break-word" }}>{displayEmail ?? ""}</p>
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{ width: "100%" }}
+                    onClick={() => {
+                      dispatch(logoutRequested());
+                      setProfileOpen(false);
+                    }}
+                  >
+                    LOGOUT
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <Link
@@ -392,7 +476,14 @@ const Navbar = () => {
               setDrawerOpen(false);
             }}
           >
-            TICKETS
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+              <span>TICKETS</span>
+              {cartCount > 0 && (
+                <span className="cart-badge" aria-label={`${cartCount} tickets selected`}>
+                  {cartCount}
+                </span>
+              )}
+            </span>
           </Link>
           <Link
             href={links.fanZone}
@@ -427,14 +518,14 @@ const Navbar = () => {
             TOGGLE THEME
           </button>
 
-          {isAuthed && user ? (
+          {isAuthed ? (
             <>
               <div className="profile-chip" style={{ width: "100%", justifyContent: "center" }}>
                 <div className="profile-avatar" aria-hidden="true">
-                  {getInitials(user.name)}
+                  {getInitials(displayEmail)}
                 </div>
                 <div className="profile-name" style={{ maxWidth: "70%" }}>
-                  {user.name}
+                  {displayEmail ?? ""}
                 </div>
               </div>
               <button
@@ -442,7 +533,7 @@ const Navbar = () => {
                 className="btn btn-secondary"
                 style={{ width: "100%" }}
                 onClick={() => {
-                  logout();
+                  dispatch(logoutRequested());
                   setDrawerOpen(false);
                 }}
               >

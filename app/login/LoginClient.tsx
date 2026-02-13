@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useAuth } from "@/components/AuthProvider";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { clearAuthError, loginRequested, registerRequested } from "@/lib/store/authSlice";
 
 type Mode = "login" | "register";
 
@@ -17,7 +18,6 @@ const loginSchema = Yup.object({
 });
 
 const registerSchema = Yup.object({
-  name: Yup.string().trim().min(2, "Minimum 2 characters").required("Name is required"),
   email: emailSchema,
   password: Yup.string().min(6, "Minimum 6 characters").required("Password is required"),
 });
@@ -27,9 +27,9 @@ export default function LoginClient() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/";
 
-  const { status, user, login, register } = useAuth();
+  const dispatch = useAppDispatch();
+  const auth = useAppSelector((s) => s.auth);
   const [mode, setMode] = useState<Mode>("login");
-  const [formError, setFormError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const safeNext = useMemo(() => {
@@ -37,7 +37,22 @@ export default function LoginClient() {
     return next;
   }, [next]);
 
-  if (status === "authenticated" && user) {
+  const isAuthed = auth.status === "authenticated" && !!auth.token;
+  const isLoading = auth.status === "loading";
+
+  useEffect(() => {
+    // Prevent navigating back to auth screens once authenticated.
+    if (isAuthed) {
+      router.replace(safeNext);
+    }
+  }, [isAuthed, router, safeNext]);
+
+  useEffect(() => {
+    // Clear stale errors when switching between login/register.
+    dispatch(clearAuthError());
+  }, [dispatch, mode]);
+
+  if (isAuthed) {
     return (
       <div className="container" style={{ padding: "8rem 2rem" }}>
         <div
@@ -68,9 +83,9 @@ export default function LoginClient() {
               marginBottom: "1rem",
             }}
           >
-            Welcome, {user.name}
+            Welcome
           </h1>
-          <p style={{ color: "var(--muted)", fontWeight: 700, marginBottom: "2rem" }}>{user.email}</p>
+          <p style={{ color: "var(--muted)", fontWeight: 700, marginBottom: "2rem" }}>{auth.email ?? ""}</p>
           <button className="btn" type="button" onClick={() => router.push(safeNext)} style={{ width: "100%" }}>
             CONTINUE
           </button>
@@ -131,7 +146,6 @@ export default function LoginClient() {
               className={mode === "login" ? "btn" : "btn btn-secondary"}
               onClick={() => {
                 setMode("login");
-                setFormError(null);
                 setShowPassword(false);
               }}
               style={{ flex: 1, padding: "0.9rem 1rem", fontSize: "0.85rem" }}
@@ -143,7 +157,6 @@ export default function LoginClient() {
               className={mode === "register" ? "btn" : "btn btn-secondary"}
               onClick={() => {
                 setMode("register");
-                setFormError(null);
                 setShowPassword(false);
               }}
               style={{ flex: 1, padding: "0.9rem 1rem", fontSize: "0.85rem" }}
@@ -158,15 +171,8 @@ export default function LoginClient() {
               initialValues={{ email: "", password: "" }}
               validationSchema={loginSchema}
               onSubmit={async (values, helpers) => {
-                setFormError(null);
-                try {
-                  await login(values);
-                  router.push(safeNext);
-                } catch (err) {
-                  setFormError(err instanceof Error ? err.message : "Login failed");
-                } finally {
-                  helpers.setSubmitting(false);
-                }
+                dispatch(loginRequested(values));
+                helpers.setSubmitting(false);
               }}
             >
               {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
@@ -231,14 +237,14 @@ export default function LoginClient() {
                     )}
                   </label>
 
-                  {formError && (
+                  {auth.error && (
                     <div style={{ border: "1px solid var(--border-subtle)", background: "var(--surface-0)", padding: "1rem" }}>
-                      <p style={{ color: "var(--foreground)", fontWeight: 800 }}>{formError}</p>
+                      <p style={{ color: "var(--foreground)", fontWeight: 800 }}>{auth.error}</p>
                     </div>
                   )}
 
-                  <button className="btn" type="submit" disabled={isSubmitting} style={{ width: "100%", padding: "1.1rem" }}>
-                    {isSubmitting ? "SIGNING IN…" : "SIGN IN"}
+                  <button className="btn" type="submit" disabled={isSubmitting || isLoading} style={{ width: "100%", padding: "1.1rem" }}>
+                    {isLoading ? "SIGNING IN…" : "SIGN IN"}
                   </button>
 
                   <p style={{ color: "var(--muted)", fontWeight: 700, fontSize: "0.85rem" }}>
@@ -260,40 +266,15 @@ export default function LoginClient() {
           ) : (
             <Formik
               key="register"
-              initialValues={{ name: "", email: "", password: "" }}
+              initialValues={{ email: "", password: "" }}
               validationSchema={registerSchema}
               onSubmit={async (values, helpers) => {
-                setFormError(null);
-                try {
-                  await register(values);
-                  router.push(safeNext);
-                } catch (err) {
-                  setFormError(err instanceof Error ? err.message : "Registration failed");
-                } finally {
-                  helpers.setSubmitting(false);
-                }
+                dispatch(registerRequested(values));
+                helpers.setSubmitting(false);
               }}
             >
               {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <span style={{ fontWeight: 900, letterSpacing: "1px", textTransform: "uppercase", fontSize: "0.75rem", color: "var(--muted)" }}>
-                      Full name
-                    </span>
-                    <input
-                      name="name"
-                      value={values.name}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      placeholder="Your name"
-                      autoComplete="name"
-                      style={{ padding: "1rem", border: "1px solid var(--border-subtle)", background: "var(--surface-0)", color: "var(--foreground)", outline: "none" }}
-                    />
-                    {touched.name && errors.name && (
-                      <span style={{ color: "var(--accent)", fontWeight: 800, fontSize: "0.8rem" }}>{errors.name}</span>
-                    )}
-                  </label>
-
                   <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                     <span style={{ fontWeight: 900, letterSpacing: "1px", textTransform: "uppercase", fontSize: "0.75rem", color: "var(--muted)" }}>
                       Email
@@ -354,14 +335,14 @@ export default function LoginClient() {
                     )}
                   </label>
 
-                  {formError && (
+                  {auth.error && (
                     <div style={{ border: "1px solid var(--border-subtle)", background: "var(--surface-0)", padding: "1rem" }}>
-                      <p style={{ color: "var(--foreground)", fontWeight: 800 }}>{formError}</p>
+                      <p style={{ color: "var(--foreground)", fontWeight: 800 }}>{auth.error}</p>
                     </div>
                   )}
 
-                  <button className="btn" type="submit" disabled={isSubmitting} style={{ width: "100%", padding: "1.1rem" }}>
-                    {isSubmitting ? "CREATING…" : "CREATE ACCOUNT"}
+                  <button className="btn" type="submit" disabled={isSubmitting || isLoading} style={{ width: "100%", padding: "1.1rem" }}>
+                    {isLoading ? "CREATING…" : "CREATE ACCOUNT"}
                   </button>
 
                   <p style={{ color: "var(--muted)", fontWeight: 700, fontSize: "0.85rem" }}>

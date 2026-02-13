@@ -1,15 +1,28 @@
 "use client";
 
-import mockDataRaw from "@/data/mockData.json";
 import MatchCard from "@/components/MatchCard";
 import Link from 'next/link';
-import type { MockData } from '@/types/mockData';
 import { links } from "@/constants/path";
-
-const mockData = mockDataRaw as MockData;
+import { useEffect, useMemo } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import {
+  fixturesRequested,
+  selectFixturesItems,
+  selectFixturesStatus,
+} from "@/lib/store/fixturesSlice";
 
 export default function Home() {
-  const featuredMatches = mockData.events.slice(0, 3);
+  const dispatch = useAppDispatch();
+  const items = useAppSelector(selectFixturesItems);
+  const status = useAppSelector(selectFixturesStatus);
+
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fixturesRequested(undefined));
+    }
+  }, [dispatch, status]);
+
+  const featuredMatches = useMemo(() => items.slice(0, 3), [items]);
 
   return (
     <div className="home-page">
@@ -71,6 +84,12 @@ export default function Home() {
               <MatchCard key={match.id} match={match} />
             ))}
           </div>
+
+          {status !== "loading" && featuredMatches.length === 0 && (
+            <div style={{ marginTop: "2rem", color: "var(--muted)", fontWeight: 700 }}>
+              No fixtures available.
+            </div>
+          )}
         </div>
       </section>
 

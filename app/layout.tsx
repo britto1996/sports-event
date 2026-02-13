@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { AuthProvider } from '@/components/AuthProvider';
+import ReduxProvider from '@/components/ReduxProvider';
 
 export const metadata: Metadata = {
   title: 'La Cima | Live Sports Experience',
@@ -17,13 +17,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
+        <ReduxProvider>
           <Navbar />
           <main style={{ minHeight: '80vh' }}>
             {children}
           </main>
           <Footer />
-        </AuthProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

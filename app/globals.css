@@ -203,6 +203,21 @@ h6 {
   gap: 1rem;
 }
 
+.cart-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: black;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
 .profile-chip {
   display: inline-flex;
   align-items: center;

@@ -56,13 +56,30 @@ const MatchCard = ({ match }: { match: MatchProps }) => {
             <div className="teams-vs" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flex: 1 }}>
                 <div className="team" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
                     <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', padding: '10px', background: 'transparent' }}>
-                        <Image
-                            src={match.homeTeam.logo}
-                            alt={match.homeTeam.name}
-                            fill
-                            sizes="80px"
-                            style={{ objectFit: 'contain' }}
-                        />
+                        {match.homeTeam.logo ? (
+                            <Image
+                                src={match.homeTeam.logo}
+                                alt={match.homeTeam.name}
+                                fill
+                                sizes="80px"
+                                style={{ objectFit: 'contain' }}
+                            />
+                        ) : (
+                            <div
+                                aria-hidden="true"
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    display: 'grid',
+                                    placeItems: 'center',
+                                    background: 'var(--surface-1)',
+                                    color: 'var(--foreground)',
+                                    fontWeight: 900,
+                                }}
+                            >
+                                {(match.homeTeam.name?.[0] ?? 'H').toUpperCase()}
+                            </div>
+                        )}
                     </div>
                     <span style={{ fontWeight: 800, fontSize: '1.2rem', textAlign: 'center', lineHeight: 1.1 }}>{match.homeTeam.name}</span>
                     {(isLive || match.status === 'Finished') && (
@@ -76,13 +93,30 @@ const MatchCard = ({ match }: { match: MatchProps }) => {
 
                 <div className="team" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
                     <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', padding: '10px', background: 'transparent' }}>
-                        <Image
-                            src={match.awayTeam.logo}
-                            alt={match.awayTeam.name}
-                            fill
-                            sizes="80px"
-                            style={{ objectFit: 'contain' }}
-                        />
+                        {match.awayTeam.logo ? (
+                            <Image
+                                src={match.awayTeam.logo}
+                                alt={match.awayTeam.name}
+                                fill
+                                sizes="80px"
+                                style={{ objectFit: 'contain' }}
+                            />
+                        ) : (
+                            <div
+                                aria-hidden="true"
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    display: 'grid',
+                                    placeItems: 'center',
+                                    background: 'var(--surface-1)',
+                                    color: 'var(--foreground)',
+                                    fontWeight: 900,
+                                }}
+                            >
+                                {(match.awayTeam.name?.[0] ?? 'A').toUpperCase()}
+                            </div>
+                        )}
                     </div>
                     <span style={{ fontWeight: 800, fontSize: '1.2rem', textAlign: 'center', lineHeight: 1.1 }}>{match.awayTeam.name}</span>
                     {(isLive || match.status === 'Finished') && (

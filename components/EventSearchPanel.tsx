@@ -2,10 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import mockDataRaw from "@/data/mockData.json";
-import type { MatchEvent, MockData } from "@/types/mockData";
-
-const mockData = mockDataRaw as MockData;
+import type { MatchEvent } from "@/types/mockData";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import {
+  fixturesRequested,
+  selectFixturesItems,
+  selectFixturesStatus,
+} from "@/lib/store/fixturesSlice";
 
 type FilterValue = "__ALL__";
 
@@ -21,27 +25,37 @@ export default function EventSearchPanel({
 }: {
   onClose: () => void;
 }) {
+  const dispatch = useAppDispatch();
+  const events = useAppSelector(selectFixturesItems);
+  const status = useAppSelector(selectFixturesStatus);
+
   const [query, setQuery] = useState("");
   const [venue, setVenue] = useState<string | FilterValue>("__ALL__");
   const [game, setGame] = useState<string | FilterValue>("__ALL__");
 
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fixturesRequested(undefined));
+    }
+  }, [dispatch, status]);
+
   const venues = useMemo(() => {
     const set = new Set<string>();
-    mockData.events.forEach((e) => set.add(e.venue));
+    events.forEach((e) => set.add(e.venue));
     return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, []);
+  }, [events]);
 
   const games = useMemo(() => {
     const set = new Set<string>();
-    mockData.events.forEach((e) => {
+    events.forEach((e) => {
       if (e.competition) set.add(e.competition);
     });
     return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, []);
+  }, [events]);
 
   const filtered = useMemo(() => {
     const q = normalize(query);
-    return mockData.events
+    return events
       .filter((e) => {
         if (venue !== "__ALL__" && e.venue !== venue) return false;
         if (game !== "__ALL__" && (e.competition ?? "") !== game) return false;
@@ -62,7 +76,7 @@ export default function EventSearchPanel({
         return haystack.includes(q);
       })
       .sort((a, b) => toDateKey(b) - toDateKey(a));
-  }, [query, venue, game]);
+  }, [events, query, venue, game]);
 
   return (
     <div className="search-panel" role="region" aria-label="Search events">

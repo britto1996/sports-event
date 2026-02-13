@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    const target = (process.env.API_PROXY_TARGET || "http://localhost:8000").trim();
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${target.replace(/\/$/, "")}/api/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
