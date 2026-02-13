@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Text } from "@react-three/drei";
+import { OrbitControls, Text, Environment, ContactShadows, SoftShadows, Float } from "@react-three/drei";
 import { useMemo } from "react";
 import type { MatchEvent } from "@/types/mockData";
 import { buildPlayersForMatch } from "@/components/three/playerSim";
@@ -9,9 +9,9 @@ import { buildPlayersForMatch } from "@/components/three/playerSim";
 function Pitch() {
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[10, 7]} />
-        <meshStandardMaterial color="#f7f7f7" />
+        <meshStandardMaterial color="#4a9c2d" roughness={0.8} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
         <ringGeometry args={[1.35, 1.42, 80]} />
@@ -41,15 +41,22 @@ function PlayerToken({
   label: string;
 }) {
   return (
-    <group position={[x, 0.12, z]}>
-      <mesh>
-        <cylinderGeometry args={[0.16, 0.16, 0.12, 20]} />
-        <meshStandardMaterial color={color} roughness={0.55} />
+    <group position={[x, 0.15, z]}>
+      <mesh castShadow>
+        <capsuleGeometry args={[0.12, 0.3, 4, 8]} />
+        <meshStandardMaterial color={color} roughness={0.3} metalness={0.5} />
+      </mesh>
+      {/* Glow ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.25, 0]}>
+        <ringGeometry args={[0.2, 0.25, 32]} />
+        <meshBasicMaterial color={color} transparent opacity={0.6} />
       </mesh>
       <Text
-        position={[0, 0.18, 0]}
-        fontSize={0.16}
-        color="#222"
+        position={[0, 0.45, 0]}
+        fontSize={0.2}
+        color="white"
+        outlineWidth={0.02}
+        outlineColor="black"
         anchorX="center"
         anchorY="middle"
       >
@@ -111,9 +118,12 @@ export default function LiveMatch3DView({ match }: { match: MatchEvent }) {
         background: "var(--surface-1)",
       }}
     >
-      <Canvas camera={{ position: [0, 6.2, 12.5], fov: 45, near: 0.1, far: 100 }}>
-        <ambientLight intensity={0.85} />
-        <directionalLight position={[10, 10, 7]} intensity={1.1} />
+      <Canvas shadows camera={{ position: [0, 8, 12], fov: 45, near: 0.1, far: 100 }}>
+        <SoftShadows size={10} samples={10} focus={0.5} />
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow shadow-bias={-0.001} />
+        <Environment preset="city" />
+        <ContactShadows position={[0, 0.01, 0]} opacity={0.4} scale={20} blur={2} far={4} color="#000000" />
         <Pitch />
         <StatBoard match={match} />
 

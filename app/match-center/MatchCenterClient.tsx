@@ -1,9 +1,12 @@
 "use client";
 import MatchCard from "@/components/MatchCard";
 import LiveMatch3DView from "@/components/three/LiveMatch3DView";
-import Fixtures3DView from "@/components/three/Fixtures3DView";
 import type { MatchEvent } from "@/types/mockData";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+import VenueStatsDisplay from "@/components/VenueStatsDisplay";
+
+const Venue3DView = dynamic(() => import("@/components/Venue3DView"), { ssr: false });
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   fixturesRequested,
@@ -21,7 +24,9 @@ export default function MatchCenterClient({ matchId }: { matchId?: string }) {
   const events = useAppSelector(selectFixturesItems);
   const status = useAppSelector(selectFixturesStatus);
   const liveItems = useAppSelector(selectLiveMatchesItems);
+
   const liveStatus = useAppSelector(selectLiveMatchesStatus);
+  const [showVenue3D, setShowVenue3D] = useState(false);
 
   useEffect(() => {
     if (status === "idle") {
@@ -111,8 +116,71 @@ export default function MatchCenterClient({ matchId }: { matchId?: string }) {
                 </span>
               </div>
             </div>
-            <LiveMatch3DView match={selectedMatch} />
           </div>
+
+          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setShowVenue3D(true)}
+              className="btn"
+              style={{ flex: 1, minWidth: 'min(300px, 100%)', justifyContent: 'center' }}
+            >
+              EXPLORE VENUE IN 3D
+            </button>
+            <button className="btn btn-secondary" style={{ flex: 1, minWidth: 'min(300px, 100%)', justifyContent: 'center' }}>
+              MATCH REPORT (PDF)
+            </button>
+          </div>
+
+          <VenueStatsDisplay venueName={selectedMatch.venue} />
+
+          {/* Simple Venue Images Grid */}
+          <div className="grid-3" style={{ marginTop: '4rem', marginBottom: '6rem' }}>
+            {[1, 2, 3].map((i) => (
+              <div key={i} style={{
+                height: '240px',
+                background: 'var(--surface-1)',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                {/* Using placeholder colors/gradients since we don't have real images yet */}
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  background: `linear-gradient(${135 + i * 45}deg, var(--card-bg), var(--surface-2))`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--muted)',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}>
+                  Venue View {i}
+                </div>
+
+                {/* Mock Image Overlay Text */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  padding: '1rem',
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                  color: 'white',
+                  fontWeight: 700,
+                  fontSize: '0.9rem'
+                }}>
+                  {i === 1 ? 'Main Stand' : i === 2 ? 'VIP Box' : 'Aerial View'}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {showVenue3D && (
+            <Venue3DView venueName={selectedMatch.venue} onClose={() => setShowVenue3D(false)} />
+          )}
         </section>
       ) : (
         <div
@@ -145,8 +213,6 @@ export default function MatchCenterClient({ matchId }: { matchId?: string }) {
           SEASON 2026/27
         </span>
       </div>
-
-      <Fixtures3DView events={events} />
 
       {/* Keep the cards as a fallback for quick scanning */}
       <div style={{ marginTop: "4rem" }}>

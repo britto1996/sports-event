@@ -28,7 +28,7 @@ export default function Home() {
     <div className="home-page">
       {/* Hero Section */}
       <section className="hero">
-        <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: "1024px", textAlign: 'center', marginTop: "80px"  }}>
+        <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: "1024px", textAlign: 'center', marginTop: "80px" }}>
           <h1 className="animate-fade-in" style={{
             fontSize: 'clamp(2.6rem, 6vw, 4.5rem)',
             fontWeight: 800,
@@ -89,51 +89,6 @@ export default function Home() {
               No fixtures available.
             </div>
           )}
-        </div>
-      </section>
-
-      {/* AI Promo Section - Split Layout */}
-      <section style={{ background: 'var(--surface-2)', padding: '7rem 0' }}>
-        <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '6rem', alignItems: 'center' }}>
-            <div style={{ position: 'relative' }}>
-              <div style={{
-                height: '600px',
-                background: 'var(--card-bg)',
-                borderRadius: 'var(--radius)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid var(--card-border)'
-              }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '4rem', marginBottom: '2rem' }}>⚡</div>
-                  <p style={{ fontWeight: 650, color: 'var(--muted)' }}>AI interface</p>
-                </div>
-              </div>
-              <div style={{
-                position: 'absolute',
-                top: '-20px',
-                right: '-20px',
-                background: 'var(--accent)',
-                color: '#fff',
-                padding: '1rem 2rem',
-                fontWeight: 750,
-                fontSize: '0.85rem'
-              }}>
-                Premium
-              </div>
-            </div>
-            <div>
-              <h2 style={{ fontSize: '2.2rem', marginBottom: '1.25rem', lineHeight: '1.1' }}>Next‑gen engagement</h2>
-              <p style={{ color: 'var(--muted)', marginBottom: '3rem', fontSize: '1.2rem', fontWeight: '500', lineHeight: '1.6' }}>
-                Personalized match-day assistants powered by advanced AI. Real-time stats, instant ticketing assistance, and custom fan alerts.
-              </p>
-              <Link href={links.matchCenter} className="btn" style={{ padding: '1.25rem 3rem' }}>
-                OPEN MATCH CENTER
-              </Link>
-            </div>
-          </div>
         </div>
       </section>
     </div>

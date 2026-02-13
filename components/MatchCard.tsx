@@ -2,6 +2,10 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const Venue3DView = dynamic(() => import('./Venue3DView'), { ssr: false });
 
 interface Team {
     name: string;
@@ -28,6 +32,7 @@ interface MatchProps {
 const MatchCard = ({ match }: { match: MatchProps }) => {
     const isLive = match.status === 'Live';
     const isUpcoming = match.status === 'Upcoming';
+    const [showVenue, setShowVenue] = useState(false);
 
     // Format date consistently to avoid hydration mismatch
     const formatDate = (dateStr: string) => {
@@ -37,7 +42,7 @@ const MatchCard = ({ match }: { match: MatchProps }) => {
                 day: '2-digit',
                 month: 'short',
                 year: 'numeric',
-				timeZone: 'UTC'
+                timeZone: 'UTC'
             }).toUpperCase();
         } catch {
             return dateStr;
@@ -142,7 +147,19 @@ const MatchCard = ({ match }: { match: MatchProps }) => {
                         </Link>
                     )}
                 </div>
+
+                <button
+                    onClick={() => setShowVenue(true)}
+                    className="btn btn-secondary"
+                    style={{ width: '100%', fontSize: '0.8rem', padding: '1rem', marginTop: '0.5rem', justifyContent: 'center' }}
+                >
+                    VIEW VENUE 3D
+                </button>
             </div>
+
+            {showVenue && (
+                <Venue3DView venueName={match.venue} onClose={() => setShowVenue(false)} />
+            )}
 
             <style jsx>{`
         .live-badge {
