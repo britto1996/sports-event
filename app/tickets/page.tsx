@@ -1,10 +1,12 @@
 import TicketsClient from "./TicketsClient";
 
-export default function TicketsPage({
+export default async function TicketsPage({
   searchParams,
 }: {
-  searchParams?: { t?: string };
+  searchParams?: Promise<{ t?: string | string[] }> | { t?: string | string[] };
 }) {
-  const t = searchParams?.t;
+  const resolved = await Promise.resolve(searchParams);
+  const raw = resolved?.t;
+  const t = Array.isArray(raw) ? raw[0] : raw;
   return <TicketsClient eventId={t} />;
 }

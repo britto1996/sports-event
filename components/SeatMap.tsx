@@ -56,9 +56,9 @@ export default function SeatMap({
         VIP: labelByCategory?.VIP ?? defaultLabels.VIP,
     };
 
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
     const isAllowed = (category: SeatCategory) => allowedCategories.includes(category);
+
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
     const getSeat = (row: string, rIndex: number, number: number): SeatSelection => {
         const category: SeatCategory = rIndex < 2 ? 'VIP' : 'Standard';

@@ -1,6 +1,7 @@
 "use client";
 import MatchCard from "@/components/MatchCard";
-import LiveStats from "@/components/LiveStats";
+import LiveMatch3DView from "@/components/three/LiveMatch3DView";
+import Fixtures3DView from "@/components/three/Fixtures3DView";
 import type { MatchEvent } from "@/types/mockData";
 import { useEffect, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
@@ -44,19 +45,19 @@ export default function MatchCenterClient({ matchId }: { matchId?: string }) {
 
   return (
     <div className="container" style={{ padding: "8rem 2rem" }}>
-      <div style={{ textAlign: "center", marginBottom: "8rem" }}>
+      <div style={{ textAlign: "center", marginBottom: "4rem" }}>
         <h1
           style={{
-            fontSize: "clamp(4rem, 10vw, 8rem)",
-            fontWeight: "900",
-            lineHeight: "0.9",
+            fontSize: "clamp(2.2rem, 5vw, 3.5rem)",
+            fontWeight: 800,
+            lineHeight: 1.1,
             marginBottom: "1rem",
           }}
         >
-          MATCH CENTER
+          Match center
         </h1>
-        <p style={{ color: "var(--accent)", fontWeight: "800", letterSpacing: "2px" }}>
-          REAL-TIME DATA ENGINE
+        <p style={{ color: "var(--muted)", fontWeight: 650 }}>
+          Real‑time live match feed
         </p>
       </div>
 
@@ -89,28 +90,28 @@ export default function MatchCenterClient({ matchId }: { matchId?: string }) {
                 marginBottom: "4rem",
               }}
             >
-              <h2 style={{ fontSize: "1.5rem", fontWeight: "900", letterSpacing: "1px" }}>
-                MATCH ANALYSIS
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 750, letterSpacing: "-0.01em" }}>
+                Match analysis
               </h2>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                 <span
                   style={{
                     background: "var(--accent)",
-                    color: "#000",
+                    color: "#fff",
                     padding: "0.5rem 1rem",
-                    borderRadius: "0",
-                    fontWeight: "900",
+                    borderRadius: 999,
+                    fontWeight: 750,
                     fontSize: "0.75rem",
                   }}
                 >
-                  LIVE FEED
+                  Live
                 </span>
-                <span style={{ color: "var(--muted)", fontSize: "0.8rem", fontWeight: "700" }}>
-                  CONNECTED TO STADIUM NETWORKS
+                <span style={{ color: "var(--muted)", fontSize: "0.9rem", fontWeight: 600 }}>
+                  Updated in real time
                 </span>
               </div>
             </div>
-            <LiveStats match={selectedMatch} />
+            <LiveMatch3DView match={selectedMatch} />
           </div>
         </section>
       ) : (
@@ -137,18 +138,23 @@ export default function MatchCenterClient({ matchId }: { matchId?: string }) {
           marginBottom: "4rem",
         }}
       >
-        <h2 style={{ fontSize: "clamp(1.6rem, 4.5vw, 2.5rem)", fontWeight: "900" }}>
-          FIXTURES & RESULTS
+        <h2 style={{ fontSize: "clamp(1.2rem, 3vw, 1.6rem)", fontWeight: 750 }}>
+          Fixtures & results
         </h2>
         <span style={{ color: "var(--muted)", fontWeight: "700", fontSize: "0.9rem" }}>
           SEASON 2026/27
         </span>
       </div>
 
-      <div className="grid-3">
-        {events.map((match) => (
-          <MatchCard key={match.id} match={match} />
-        ))}
+      <Fixtures3DView events={events} />
+
+      {/* Keep the cards as a fallback for quick scanning */}
+      <div style={{ marginTop: "4rem" }}>
+        <div className="grid-3">
+          {events.map((match) => (
+            <MatchCard key={match.id} match={match} />
+          ))}
+        </div>
       </div>
     </div>
   );

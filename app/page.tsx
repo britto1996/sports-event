@@ -26,31 +26,31 @@ export default function Home() {
 
   return (
     <div className="home-page">
-      {/* Hero Section - Immersive Nike Style */}
+      {/* Hero Section */}
       <section className="hero">
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: "1024px", textAlign: 'center', marginTop: "80px"  }}>
           <h1 className="animate-fade-in" style={{
-            fontSize: 'clamp(4rem, 15vw, 12rem)',
-            fontWeight: '900',
-            lineHeight: '0.85',
-            letterSpacing: '-0.05em',
-            marginBottom: '3rem'
+            fontSize: 'clamp(2.6rem, 6vw, 4.5rem)',
+            fontWeight: 800,
+            lineHeight: '1.05',
+            marginBottom: '1.5rem',
           }}>
-            REDEFINE<br />THE GAME
+            Experiance the thrill of live sports like never before
           </h1>
           <p className="animate-fade-in" style={{
-            fontSize: '1.25rem',
-            fontWeight: '600',
+            fontSize: '1.05rem',
+            fontWeight: 600,
             color: 'var(--muted)',
-            marginBottom: '4rem',
             maxWidth: '600px',
-            margin: '0 auto 4rem',
-            textTransform: 'uppercase',
-            letterSpacing: '1px'
+            marginTop: 0,
+            marginRight: 'auto',
+            marginBottom: '2.5rem',
+            marginLeft: 'auto',
+            letterSpacing: '0'
           }}>
             Experience sports production at its peak. Official platforms for the {"world's"} greatest events.
           </p>
-          <div className="animate-fade-in" style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
+          <div className="animate-fade-in" style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', marginTop: '1rem' }}>
             <Link href={links.tickets} className="btn">
               GET TICKETS
             </Link>
@@ -61,22 +61,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Matches - Clean Nike Grid */}
+      {/* Featured Matches */}
       <section style={{ padding: '8rem 0', background: 'var(--background)' }}>
         <div className="container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
             <div>
-              <h2 style={{ fontSize: '3rem', fontWeight: '900', letterSpacing: '-1px' }}>LIVE & UPCOMING</h2>
-              <p style={{ color: 'var(--muted)', fontWeight: '700', marginTop: '0.5rem' }}>{"THE WORLD'S STAGE IS SET"}</p>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 750, letterSpacing: '-0.01em' }}>Live & upcoming</h2>
+              <p style={{ color: 'var(--muted)', fontWeight: 600, marginTop: '0.35rem' }}>{"The world's stage is set"}</p>
             </div>
             <Link href={links.matchCenter} style={{
-              fontWeight: '800',
-              fontSize: '0.9rem',
-              letterSpacing: '1px',
+              fontWeight: 700,
+              fontSize: '0.95rem',
               borderBottom: '2px solid var(--accent)',
               paddingBottom: '4px'
             }}>
-              VIEW ALL FIXTURES
+              View all fixtures
             </Link>
           </div>
           <div className="grid-3">
@@ -94,22 +93,22 @@ export default function Home() {
       </section>
 
       {/* AI Promo Section - Split Layout */}
-      <section style={{ background: 'var(--surface-2)', padding: '10rem 0' }}>
+      <section style={{ background: 'var(--surface-2)', padding: '7rem 0' }}>
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '6rem', alignItems: 'center' }}>
             <div style={{ position: 'relative' }}>
               <div style={{
                 height: '600px',
                 background: 'var(--card-bg)',
-                borderRadius: '0',
+                borderRadius: 'var(--radius)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '1px solid var(--border-subtle)'
+                border: '1px solid var(--card-border)'
               }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '4rem', marginBottom: '2rem' }}>⚡</div>
-                  <p style={{ fontWeight: '900', letterSpacing: '2px', color: 'var(--muted)' }}>AI INTERFACE v.2.0</p>
+                  <p style={{ fontWeight: 650, color: 'var(--muted)' }}>AI interface</p>
                 </div>
               </div>
               <div style={{
@@ -117,22 +116,21 @@ export default function Home() {
                 top: '-20px',
                 right: '-20px',
                 background: 'var(--accent)',
-                color: '#000',
+                color: '#fff',
                 padding: '1rem 2rem',
-                fontWeight: '900',
-                fontSize: '0.8rem',
-                letterSpacing: '1px'
+                fontWeight: 750,
+                fontSize: '0.85rem'
               }}>
-                NEURAL ENGINE
+                Premium
               </div>
             </div>
             <div>
-              <h2 style={{ fontSize: '4.5rem', marginBottom: '2rem', lineHeight: '0.9' }}>NEXT-GEN ENGAGEMENT</h2>
+              <h2 style={{ fontSize: '2.2rem', marginBottom: '1.25rem', lineHeight: '1.1' }}>Next‑gen engagement</h2>
               <p style={{ color: 'var(--muted)', marginBottom: '3rem', fontSize: '1.2rem', fontWeight: '500', lineHeight: '1.6' }}>
                 Personalized match-day assistants powered by advanced AI. Real-time stats, instant ticketing assistance, and custom fan alerts.
               </p>
-              <Link href="/fan-zone" className="btn" style={{ padding: '1.25rem 3rem' }}>
-                ENTER FAN ZONE
+              <Link href={links.matchCenter} className="btn" style={{ padding: '1.25rem 3rem' }}>
+                OPEN MATCH CENTER
               </Link>
             </div>
           </div>

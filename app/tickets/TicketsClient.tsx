@@ -31,6 +31,11 @@ export default function TicketsClient({ eventId }: { eventId?: string }) {
     return events.find((e) => e.id === eventId);
   }, [events, eventId]);
 
+  const upcomingEvents = useMemo(
+    () => events.filter((e) => e.status === "Upcoming"),
+    [events]
+  );
+
   if (selectedEvent) {
     return (
       <div className="container" style={{ padding: "8rem 2rem 4rem" }}>
@@ -39,10 +44,8 @@ export default function TicketsClient({ eventId }: { eventId?: string }) {
           style={{
             fontSize: "0.8rem",
             color: "var(--muted)",
-            textTransform: "uppercase",
             marginBottom: "4rem",
             display: "inline-block",
-            letterSpacing: "2px",
             fontWeight: 600,
           }}
         >
@@ -54,23 +57,18 @@ export default function TicketsClient({ eventId }: { eventId?: string }) {
     );
   }
 
-  const upcomingEvents = useMemo(
-    () => events.filter((e) => e.status === "Upcoming"),
-    [events]
-  );
-
   return (
     <div className="container" style={{ padding: "8rem 2rem" }}>
       <h1
         className="gradient-text"
         style={{
           textAlign: "center",
-          fontSize: "clamp(3rem, 6vw, 6rem)",
+          fontSize: "clamp(2rem, 4.5vw, 3rem)",
           marginBottom: "1rem",
-          lineHeight: 0.9,
+          lineHeight: 1.1,
         }}
       >
-        UPCOMING FIXTURES
+        Upcoming fixtures
       </h1>
       <p
         style={{
@@ -79,7 +77,8 @@ export default function TicketsClient({ eventId }: { eventId?: string }) {
           maxWidth: "600px",
           margin: "0 auto 6rem",
           textAlign: "center",
-          fontSize: "1.2rem",
+          fontSize: "1.05rem",
+          fontWeight: 600,
         }}
       >
         Secure your place in history. Book tickets for the {"season's"} biggest matches.
@@ -103,19 +102,17 @@ export default function TicketsClient({ eventId }: { eventId?: string }) {
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
           <h2
             style={{
-              fontSize: "clamp(1.6rem, 4.5vw, 2.5rem)",
-              fontWeight: 900,
+              fontSize: "clamp(1.25rem, 3vw, 1.6rem)",
+              fontWeight: 750,
               marginBottom: "0.75rem",
             }}
           >
-            TICKET TIERS
+            Ticket tiers
           </h2>
           <p
             style={{
-              color: "#666",
-              fontWeight: 800,
-              letterSpacing: "2px",
-              textTransform: "uppercase",
+              color: "var(--muted)",
+              fontWeight: 600,
             }}
           >
             Choose your match-day access
@@ -136,15 +133,13 @@ export default function TicketsClient({ eventId }: { eventId?: string }) {
               <p
                 style={{
                   color: "var(--accent)",
-                  fontWeight: 900,
-                  letterSpacing: "2px",
-                  textTransform: "uppercase",
+                  fontWeight: 750,
                   marginBottom: "0.75rem",
                 }}
               >
                 {tier.type}
               </p>
-              <p style={{ fontSize: "3rem", fontWeight: 900, letterSpacing: "-1px", marginBottom: "1.25rem" }}>
+              <p style={{ fontSize: "2.25rem", fontWeight: 800, marginBottom: "1.25rem" }}>
                 ${tier.price}
               </p>
               <ul
@@ -165,10 +160,8 @@ export default function TicketsClient({ eventId }: { eventId?: string }) {
               <p
                 style={{
                   color: "var(--muted)",
-                  fontWeight: 800,
-                  letterSpacing: "1px",
-                  textTransform: "uppercase",
-                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  fontSize: "0.85rem",
                   marginBottom: "1.5rem",
                 }}
               >

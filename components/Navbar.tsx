@@ -17,7 +17,7 @@ const applyTheme = (mode: ThemeMode) => {
 };
 
 const getInitialTheme = (): ThemeMode => {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
   const saved = window.localStorage.getItem("theme");
   if (saved === "light" || saved === "dark") return saved;
   return window.matchMedia?.("(prefers-color-scheme: light)").matches
@@ -172,6 +172,9 @@ const Navbar = () => {
             href={links.fanZone}
             aria-current={isActive(links.fanZone) ? "page" : undefined}
             className={isActive(links.fanZone) ? "nav-link active-nav-link" : "nav-link"}
+            style={{ display: "none" }}
+            tabIndex={-1}
+            aria-hidden="true"
           >
             FAN ZONE
           </Link>
@@ -297,25 +300,7 @@ const Navbar = () => {
             </svg>
           </button>
 
-          <button
-            type="button"
-            className="nav-link nav-text-btn"
-            aria-label="Search events"
-            aria-expanded={searchOpen}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "900",
-              letterSpacing: "1px",
-            }}
-            onClick={() => {
-              setDrawerOpen(false);
-              setSearchOpen((v) => !v);
-            }}
-          >
-            SEARCH
-          </button>
+
 
           {isAuthed ? (
             <div ref={popoverRef} style={{ position: "relative" }}>
@@ -386,23 +371,23 @@ const Navbar = () => {
               LOGIN
             </Link>
           )}
+
+          {searchOpen && (
+            <>
+              <div
+                className="search-overlay open"
+                onClick={() => setSearchOpen(false)}
+                aria-hidden="true"
+              />
+              <EventSearchPanel
+                onClose={() => {
+                  setSearchOpen(false);
+                }}
+              />
+            </>
+          )}
         </div>
       </nav>
-
-      {searchOpen && (
-        <>
-          <div
-            className="search-overlay open"
-            onClick={() => setSearchOpen(false)}
-            aria-hidden="true"
-          />
-          <EventSearchPanel
-            onClose={() => {
-              setSearchOpen(false);
-            }}
-          />
-        </>
-      )}
 
       <div
         className={`drawer-overlay${drawerOpen ? " open" : ""}`}
@@ -492,19 +477,11 @@ const Navbar = () => {
             onClick={() => {
               setDrawerOpen(false);
             }}
+            style={{ display: "none" }}
+            tabIndex={-1}
+            aria-hidden="true"
           >
             FAN ZONE
-          </Link>
-          <Link
-            href={"#"}
-            className="drawer-link"
-            onClick={(e) => {
-              e.preventDefault();
-              setDrawerOpen(false);
-              setSearchOpen(true);
-            }}
-          >
-            SEARCH
           </Link>
         </nav>
 

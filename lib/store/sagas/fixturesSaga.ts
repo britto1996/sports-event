@@ -1,7 +1,6 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { fetchFixtures } from "@/lib/api/events";
-import { getApiErrorMessage } from "@/lib/api/client";
+import { fetchFixturesMock } from "@/lib/mock/events";
 import { toastAdded } from "@/lib/store/toastSlice";
 import {
   fixturesFailed,
@@ -13,10 +12,13 @@ function* fixturesWorker(action: PayloadAction<{ date?: string } | undefined>) {
   const date = action.payload?.date ?? null;
 
   try {
-    const items: Awaited<ReturnType<typeof fetchFixtures>> = yield call(fetchFixtures, date ?? undefined);
+    const items: Awaited<ReturnType<typeof fetchFixturesMock>> = yield call(
+      fetchFixturesMock,
+      date ?? undefined
+    );
     yield put(fixturesSucceeded({ date, items }));
   } catch (err) {
-    const msg = getApiErrorMessage(err);
+    const msg = err instanceof Error ? err.message : "Failed to load fixtures.";
     yield put(fixturesFailed({ date, message: msg }));
     yield put(toastAdded({ type: "error", message: msg }));
   }

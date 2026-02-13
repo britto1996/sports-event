@@ -1,13 +1,13 @@
 import MatchCenterClient from "./MatchCenterClient";
 
-export default function MatchCenter({
+export default async function MatchCenter({
   searchParams,
 }: {
-  searchParams?: { m?: string };
+  searchParams?: Promise<{ m?: string | string[] }> | { m?: string | string[] };
 }) {
-  const m = searchParams?.m;
+  const resolved = await Promise.resolve(searchParams);
+  const raw = resolved?.m;
+  const m = Array.isArray(raw) ? raw[0] : raw;
 
-    return (
-      <MatchCenterClient matchId={m} />
-    );
+  return <MatchCenterClient matchId={m} />;
 }
