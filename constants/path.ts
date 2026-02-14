@@ -2,6 +2,7 @@ export const links = {
     home: '/',
     matchCenter: '/match-center',
     tickets: '/tickets',
+    bookings: '/tickets/bookings',
     fanZone: '/fan-zone',
 }
 

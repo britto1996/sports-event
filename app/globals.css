@@ -713,19 +713,42 @@ html[data-theme="light"] .drawer-overlay {
   /* Slightly rounded square */
   border: none;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   background: var(--seat-available);
+  position: relative;
 }
 
 .seat:hover:not(:disabled) {
-  transform: scale(1.3);
+  transform: scale(1.35);
   z-index: 10;
   background: var(--seat-hover);
+  box-shadow: 0 0 12px rgba(255, 56, 92, 0.4);
 }
 
 .seat.selected {
   background: var(--accent);
-  box-shadow: 0 0 15px var(--accent);
+  box-shadow: 
+    0 0 20px var(--accent),
+    0 0 35px rgba(255, 56, 92, 0.6),
+    0 4px 10px rgba(0, 0, 0, 0.3);
+  transform: scale(1.15);
+  animation: pulse-glow 2s ease-in-out infinite;
+  z-index: 5;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px var(--accent),
+      0 0 35px rgba(255, 56, 92, 0.6),
+      0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 25px var(--accent),
+      0 0 45px rgba(255, 56, 92, 0.8),
+      0 4px 12px rgba(0, 0, 0, 0.4);
+  }
 }
 
 .seat.occupied {

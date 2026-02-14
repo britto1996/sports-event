@@ -24,15 +24,17 @@ interface SeatMapProps {
     labelByCategory?: Partial<LabelByCategory>;
     requireAuth?: boolean;
     onRequireAuth?: () => void;
+    bookedSeatIds?: string[]; // Previously booked seats for this event
 }
 
 export default function SeatMap({
     onSelectionChange,
     allowedCategories = ['Standard', 'VIP'],
-    priceByCategory,
-    labelByCategory,
+    priceByCategory = {},
+    labelByCategory = {},
     requireAuth = false,
     onRequireAuth,
+    bookedSeatIds = [],
 }: SeatMapProps) {
     // Config
     const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -65,8 +67,12 @@ export default function SeatMap({
         const seed = row.charCodeAt(0) + number * 3;
         const isOccupied = seed % 5 === 0 || seed % 13 === 0;
         const id = `${row}${number}`;
+
+        // Check if this seat has been booked before
+        const isBooked = bookedSeatIds.includes(id);
+
         const selected = selectedIds.includes(id);
-        const status: SeatSelection['status'] = isOccupied ? 'occupied' : (selected ? 'selected' : 'available');
+        const status: SeatSelection['status'] = (isOccupied || isBooked) ? 'occupied' : (selected ? 'selected' : 'available');
         return {
             id,
             row,

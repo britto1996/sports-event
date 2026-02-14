@@ -6,7 +6,11 @@ import mockDataRaw from '@/data/mockData.json';
 import type { MatchEvent, MockData, TicketTier } from '@/types/mockData';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { cartEventSeatsSet } from '@/lib/store/cartSlice';
+import { cartEventSeatsSet, cartEventCleared } from '@/lib/store/cartSlice';
+import { bookingAdded, selectBookedSeatIds } from '@/lib/store/bookingsSlice';
+import { toastAdded } from '@/lib/store/toastSlice';
+import { links } from '@/constants/path';
+import { generateBookingReference, generateBookingQRCode } from '@/lib/qrCodeUtils';
 
 const mockData = mockDataRaw as MockData;
 
@@ -25,6 +29,9 @@ export default function EventBooking({ event }: EventBookingProps) {
 
     const [selectedTier, setSelectedTier] = useState<TicketTier>(defaultTier);
     const [selectedSeats, setSelectedSeats] = useState<SeatSelection[]>([]);
+
+    // Get already booked seats for this event
+    const bookedSeatIds = useAppSelector(selectBookedSeatIds(event.id));
 
     const handleSelectionChange = (seats: SeatSelection[]) => {
         setSelectedSeats(seats);
@@ -65,10 +72,10 @@ export default function EventBooking({ event }: EventBookingProps) {
     return (
         <div className="booking-container">
             <div style={{ marginBottom: '3rem' }}>
-				<p style={{ color: '#666', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Ticketing</p>
-				<h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: 900, lineHeight: 0.9, marginBottom: '0.75rem' }}>{event.title}</h1>
+                <p style={{ color: '#666', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Ticketing</p>
+                <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: 900, lineHeight: 0.9, marginBottom: '0.75rem' }}>{event.title}</h1>
                 <p style={{ color: '#888', fontWeight: 700 }}>{event.venue} • {new Date(event.date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' })}</p>
-			</div>
+            </div>
 
             <div className="booking-grid">
                 <div className="seat-map-section">
@@ -82,67 +89,67 @@ export default function EventBooking({ event }: EventBookingProps) {
                         Choose your venue section
                     </h2>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '2rem' }}>
-                    {tiers.map((tier) => {
-                        const active = tier.type === selectedTier.type;
-                        return (
-                            <button
-                                key={tier.type}
-                                type="button"
-                                onClick={() => {
-                                    setSelectedTier(tier);
-                                    setSelectedSeats([]);
-                                    dispatch(
-                                        cartEventSeatsSet({
-                                            eventId: event.id,
-                                            eventTitle: event.title,
-                                            tierType: tier.type,
-                                            seats: [],
-                                        })
-                                    );
-                                }}
-                                className="btn btn-secondary"
-                                style={{
-                                    borderRadius: 30,
-                                    borderColor: active ? 'var(--accent)' : 'var(--border-subtle)',
-                                    color: active ? 'var(--foreground)' : 'var(--muted)',
-                                    padding: '0.85rem 1.25rem',
-                                    display: 'inline-flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    gap: '0.25rem',
-                                    minWidth: 180,
-                                    background: active ? 'rgba(212, 255, 0, 0.08)' : 'transparent',
-                                }}
-                            >
-                                <span style={{ fontWeight: 900, letterSpacing: '1px' }}>{tier.type.toUpperCase()}</span>
-                                <span style={{ fontWeight: 800, color: 'var(--accent)' }}>${tier.price}</span>
-                            </button>
-                        );
-                    })}
-                </div>
-
-                <div className="card" style={{ padding: '1.5rem', border: '1px solid var(--border-subtle)', background: 'var(--card-bg)', marginBottom: '2rem' }}>
-                    <p style={{ fontWeight: 900, letterSpacing: '1px', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Included with {selectedTier.type}</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--muted)', fontWeight: 600 }}>
-                        {selectedTier.benefits.map((b) => (
-                            <span key={b}>• {b}</span>
-                        ))}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '2rem' }}>
+                        {tiers.map((tier) => {
+                            const active = tier.type === selectedTier.type;
+                            return (
+                                <button
+                                    key={tier.type}
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedTier(tier);
+                                        setSelectedSeats([]);
+                                        dispatch(
+                                            cartEventSeatsSet({
+                                                eventId: event.id,
+                                                eventTitle: event.title,
+                                                tierType: tier.type,
+                                                seats: [],
+                                            })
+                                        );
+                                    }}
+                                    className="btn btn-secondary"
+                                    style={{
+                                        borderRadius: 30,
+                                        borderColor: active ? 'var(--accent)' : 'var(--border-subtle)',
+                                        color: active ? 'var(--foreground)' : 'var(--muted)',
+                                        padding: '0.85rem 1.25rem',
+                                        display: 'inline-flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'flex-start',
+                                        gap: '0.25rem',
+                                        minWidth: 180,
+                                        background: active ? 'rgba(212, 255, 0, 0.08)' : 'transparent',
+                                    }}
+                                >
+                                    <span style={{ fontWeight: 900, letterSpacing: '1px' }}>{tier.type.toUpperCase()}</span>
+                                    <span style={{ fontWeight: 800, color: 'var(--accent)' }}>${tier.price}</span>
+                                </button>
+                            );
+                        })}
                     </div>
-                    <p style={{ marginTop: '1rem', color: 'var(--muted)', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
-                        Seats available depend on section
-                    </p>
-                </div>
 
-                <h2 style={{
-                    marginBottom: '2rem',
-                    fontSize: '1.2rem',
-                    fontWeight: '900',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase'
-                }}>
-                    Select your seats
-                </h2>
+                    <div className="card" style={{ padding: '1.5rem', border: '1px solid var(--border-subtle)', background: 'var(--card-bg)', marginBottom: '2rem' }}>
+                        <p style={{ fontWeight: 900, letterSpacing: '1px', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Included with {selectedTier.type}</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--muted)', fontWeight: 600 }}>
+                            {selectedTier.benefits.map((b) => (
+                                <span key={b}>• {b}</span>
+                            ))}
+                        </div>
+                        <p style={{ marginTop: '1rem', color: 'var(--muted)', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                            Seats available depend on section
+                        </p>
+                    </div>
+
+                    <h2 style={{
+                        marginBottom: '2rem',
+                        fontSize: '1.2rem',
+                        fontWeight: '900',
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase'
+                    }}>
+                        Select your seats
+                    </h2>
 
                     <SeatMap
                         key={seatMapKey}
@@ -152,6 +159,7 @@ export default function EventBooking({ event }: EventBookingProps) {
                         labelByCategory={labelByCategory}
                         requireAuth={!isAuthed}
                         onRequireAuth={redirectToLogin}
+                        bookedSeatIds={bookedSeatIds}
                     />
                 </div>
 
@@ -192,12 +200,12 @@ export default function EventBooking({ event }: EventBookingProps) {
                                         justifyContent: 'space-between',
                                         fontSize: '0.9rem',
                                         fontWeight: '700',
-                                            color: 'var(--foreground)',
+                                        color: 'var(--foreground)',
                                         alignItems: 'center'
                                     }}>
                                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                                             <span style={{ fontSize: '1rem' }}>ROW {seat.row}, SEAT {seat.number}</span>
-    										<span style={{ fontSize: '0.7rem', color: 'var(--accent)', letterSpacing: '1px' }}>{seat.typeLabel.toUpperCase()} TICKET</span>
+                                            <span style={{ fontSize: '0.7rem', color: 'var(--accent)', letterSpacing: '1px' }}>{seat.typeLabel.toUpperCase()} TICKET</span>
                                         </div>
                                         <span style={{ fontSize: '1.1rem' }}>${seat.price}</span>
                                     </div>
@@ -224,17 +232,69 @@ export default function EventBooking({ event }: EventBookingProps) {
                                 padding: '1.25rem',
                                 fontSize: '1rem',
                                 borderRadius: '30px',
-							background: selectedSeats.length > 0 && isAuthed ? 'var(--primary)' : 'transparent',
-							color: selectedSeats.length > 0 && isAuthed ? 'var(--primary-inv)' : 'var(--muted)',
-							border: `1px solid ${selectedSeats.length > 0 && isAuthed ? 'transparent' : 'var(--border-subtle)'}`,
+                                background: selectedSeats.length > 0 && isAuthed ? 'var(--primary)' : 'transparent',
+                                color: selectedSeats.length > 0 && isAuthed ? 'var(--primary-inv)' : 'var(--muted)',
+                                border: `1px solid ${selectedSeats.length > 0 && isAuthed ? 'transparent' : 'var(--border-subtle)'}`,
                             }}
                             disabled={selectedSeats.length === 0 || !isAuthed}
-                            onClick={() => {
+                            onClick={async () => {
                                 if (!isAuthed) {
                                     redirectToLogin();
                                     return;
                                 }
-                                alert(`Processing payment for $${totalPrice}...`);
+
+                                try {
+                                    // Generate booking reference and QR code
+                                    const bookingId = `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                                    const bookingReference = generateBookingReference();
+                                    const timestamp = new Date().toISOString();
+                                    const seatIds = selectedSeats.map(seat => seat.id);
+
+                                    const qrCode = await generateBookingQRCode(
+                                        bookingId,
+                                        event.id,
+                                        seatIds,
+                                        timestamp
+                                    );
+
+                                    // Create booking
+                                    const booking = {
+                                        id: bookingId,
+                                        eventId: event.id,
+                                        eventTitle: event.title,
+                                        eventDate: event.date,
+                                        venue: event.venue,
+                                        tierType: selectedTier.type,
+                                        seats: selectedSeats.map(seat => ({
+                                            id: seat.id,
+                                            row: seat.row,
+                                            number: seat.number.toString(),
+                                            price: seat.price,
+                                            typeLabel: seat.typeLabel,
+                                        })),
+                                        totalPrice: totalPrice,
+                                        bookedAt: timestamp,
+                                        status: 'confirmed' as const,
+                                        qrCode,
+                                        bookingReference,
+                                    };
+
+                                    dispatch(bookingAdded(booking));
+                                    dispatch(cartEventCleared({ eventId: event.id }));
+                                    dispatch(toastAdded({
+                                        message: `Successfully booked ${selectedSeats.length} ticket${selectedSeats.length !== 1 ? 's' : ''} for ${event.title}!`,
+                                        type: 'success',
+                                    }));
+
+                                    // Redirect to bookings page
+                                    router.push(links.bookings);
+                                } catch (error) {
+                                    console.error('Booking error:', error);
+                                    dispatch(toastAdded({
+                                        message: 'Failed to complete booking. Please try again.',
+                                        type: 'error',
+                                    }));
+                                }
                             }}
                         >
                             {isAuthed ? `CHECKOUT (${selectedSeats.length})` : 'LOGIN TO CHECKOUT'}

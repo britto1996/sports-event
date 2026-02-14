@@ -45,6 +45,29 @@ export interface TicketTier {
 	available: number;
 }
 
+export interface BookedSeat {
+	id: string;
+	row: string;
+	number: string;
+	price: number;
+	typeLabel: string;
+}
+
+export interface Booking {
+	id: string;
+	eventId: string;
+	eventTitle: string;
+	eventDate: string;
+	venue: string;
+	tierType: string;
+	seats: BookedSeat[];
+	totalPrice: number;
+	bookedAt: string;
+	status: 'confirmed' | 'cancelled';
+	qrCode: string; // Base64 encoded QR code image
+	bookingReference: string; // Human-readable reference (e.g., LCM-2026-12345)
+}
+
 export interface MockData {
 	events: MatchEvent[];
 	news: NewsArticle[];

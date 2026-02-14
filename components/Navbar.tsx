@@ -155,9 +155,9 @@ const Navbar = () => {
             MATCH CENTER
           </Link>
           <Link
-            href={links.tickets}
-            aria-current={isActive(links.tickets) ? "page" : undefined}
-            className={isActive(links.tickets) ? "nav-link active-nav-link" : "nav-link"}
+            href={links.bookings}
+            aria-current={isActive(links.bookings) ? "page" : undefined}
+            className={isActive(links.bookings) ? "nav-link active-nav-link" : "nav-link"}
           >
             <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
               <span>TICKETS</span>
@@ -454,9 +454,9 @@ const Navbar = () => {
             MATCH CENTER
           </Link>
           <Link
-            href={links.tickets}
-            aria-current={isActive(links.tickets) ? "page" : undefined}
-            className={isActive(links.tickets) ? "drawer-link drawer-link-active" : "drawer-link"}
+            href={links.bookings}
+            aria-current={isActive(links.bookings) ? "page" : undefined}
+            className={isActive(links.bookings) ? "drawer-link drawer-link-active" : "drawer-link"}
             onClick={() => {
               setDrawerOpen(false);
             }}
