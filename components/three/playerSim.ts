@@ -81,8 +81,8 @@ const formationSlots = (side: "home" | "away") => {
 };
 
 export function buildPlayersForMatch(event: MatchEvent) {
-  const homeSeed = hashString(`${event.id}:${event.homeTeam.name}`);
-  const awaySeed = hashString(`${event.id}:${event.awayTeam.name}`);
+  const homeSeed = hashString(`${event.id}:${event.homeTeam?.name || 'Home'}`);
+  const awaySeed = hashString(`${event.id}:${event.awayTeam?.name || 'Away'}`);
 
   const home = formationSlots("home").map((slot, idx) => {
     const seed = homeSeed ^ (idx * 2654435761);

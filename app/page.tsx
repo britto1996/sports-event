@@ -1,28 +1,29 @@
-"use client";
-
-import MatchCard from "@/components/MatchCard";
 import Link from 'next/link';
 import { links } from "@/constants/path";
-import { useEffect, useMemo } from "react";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import {
-  fixturesRequested,
-  selectFixturesItems,
-  selectFixturesStatus,
-} from "@/lib/store/fixturesSlice";
+import { syncEvents, fetchEvents } from "@/lib/api/events";
+import { enrichEventsWithFixtures } from "@/lib/api/enrichEvents";
+import MatchCard from "@/components/MatchCard";
+import type { MatchEvent } from "@/types/mockData";
 
-export default function Home() {
-  const dispatch = useAppDispatch();
-  const items = useAppSelector(selectFixturesItems);
-  const status = useAppSelector(selectFixturesStatus);
+export default async function Home() {
+  // Fetch events from server
+  let events: MatchEvent[] = [];
+  let error: string | null = null;
 
-  useEffect(() => {
-    if (status === "idle") {
-      dispatch(fixturesRequested(undefined));
-    }
-  }, [dispatch, status]);
+  try {
+    // Step 1: Sync events from external source
+    await syncEvents();
 
-  const featuredMatches = useMemo(() => items.slice(0, 3), [items]);
+    // Step 2: Fetch events with limit=3 for homepage
+    const allEvents = await fetchEvents(3);
+
+    // Filter for upcoming events only and sort by date (nearest first)
+    events = allEvents
+      .filter(event => event.status === "Upcoming")
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Failed to load events";
+  }
 
   return (
     <div className="home-page">
@@ -51,7 +52,7 @@ export default function Home() {
             Experience sports production at its peak. Official platforms for the {"world's"} greatest events.
           </p>
           <div className="animate-fade-in" style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', marginTop: '1rem' }}>
-            <Link href={links.tickets} className="btn">
+            <Link href={links.matchCenter} className="btn">
               GET TICKETS
             </Link>
             <Link href={links.matchCenter} className="btn btn-secondary">
@@ -61,32 +62,54 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Matches */}
+      {/* Upcoming Events */}
       <section style={{ padding: '8rem 0', background: 'var(--background)' }}>
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '4rem',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}>
             <div>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 750, letterSpacing: '-0.01em' }}>Live & upcoming</h2>
-              <p style={{ color: 'var(--muted)', fontWeight: 600, marginTop: '0.35rem' }}>{"The world's stage is set"}</p>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 750, letterSpacing: '-0.01em' }}>Upcoming Events</h2>
+              <p style={{ color: 'var(--muted)', fontWeight: 600, marginTop: '0.35rem' }}>Book your tickets for the most anticipated matches</p>
             </div>
-            <Link href={links.matchCenter} style={{
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              borderBottom: '2px solid var(--accent)',
-              paddingBottom: '4px'
-            }}>
-              View all fixtures
+
+            <Link
+              href={links.matchCenter}
+              style={{
+                fontSize: '1rem',
+                fontWeight: 700,
+                color: 'var(--accent)',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'opacity 0.2s',
+              }}
+              className="view-all-link"
+            >
+              VIEW ALL
+              <span style={{ fontSize: '1.2rem' }}>→</span>
             </Link>
           </div>
-          <div className="grid-3">
-            {featuredMatches.map((match) => (
-              <MatchCard key={match.id} match={match} />
-            ))}
-          </div>
 
-          {status !== "loading" && featuredMatches.length === 0 && (
-            <div style={{ marginTop: "2rem", color: "var(--muted)", fontWeight: 700 }}>
-              No fixtures available.
+          {error ? (
+            <div style={{ marginTop: "2rem", color: "var(--accent)", fontWeight: 700 }}>
+              {error}
+            </div>
+          ) : events.length > 0 ? (
+            <div className="grid-3" style={{ gap: '2rem' }}>
+              {events.map((event) => (
+                <MatchCard key={event.id} match={event} />
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)', fontWeight: 600 }}>
+              No upcoming events available.
             </div>
           )}
         </div>
@@ -94,3 +117,4 @@ export default function Home() {
     </div>
   );
 }
+

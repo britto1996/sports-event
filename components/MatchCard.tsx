@@ -4,35 +4,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
+import type { MatchEvent } from '@/types/mockData';
 
 const Venue3DView = dynamic(() => import('./Venue3DView'), { ssr: false });
 
-interface Team {
-    name: string;
-    logo: string;
-    score?: number;
-}
-
-interface MatchProps {
-    id: string;
-    title: string;
-    date: string;
-    venue: string;
-    status: string;
-    competition?: string;
-    homeTeam: Team;
-    awayTeam: Team;
-    ticketsAvailable?: boolean;
-    score?: { home: number; away: number };
-    possession?: { home: number; away: number };
-    shots?: { home: number; away: number };
-    minute?: string;
-}
-
-const MatchCard = ({ match }: { match: MatchProps }) => {
+const MatchCard = ({ match }: { match: MatchEvent }) => {
     const isLive = match.status === 'Live';
     const isUpcoming = match.status === 'Upcoming';
     const [showVenue, setShowVenue] = useState(false);
+
+    console.log('MatchCard received match:', match);
 
     // Format date consistently to avoid hydration mismatch
     const formatDate = (dateStr: string) => {
@@ -61,10 +42,10 @@ const MatchCard = ({ match }: { match: MatchProps }) => {
             <div className="teams-vs" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flex: 1 }}>
                 <div className="team" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
                     <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', padding: '10px', background: 'transparent' }}>
-                        {match.homeTeam.logo ? (
+                        {match.homeTeam?.logo ? (
                             <Image
                                 src={match.homeTeam.logo}
-                                alt={match.homeTeam.name}
+                                alt={match.homeTeam.name || 'Home Team'}
                                 fill
                                 sizes="80px"
                                 style={{ objectFit: 'contain' }}
@@ -82,14 +63,14 @@ const MatchCard = ({ match }: { match: MatchProps }) => {
                                     fontWeight: 900,
                                 }}
                             >
-                                {(match.homeTeam.name?.[0] ?? 'H').toUpperCase()}
+                                {(match.homeTeam?.name?.[0] ?? 'H').toUpperCase()}
                             </div>
                         )}
                     </div>
-                    <span style={{ fontWeight: 800, fontSize: '1.2rem', textAlign: 'center', lineHeight: 1.1 }}>{match.homeTeam.name}</span>
+                    <span style={{ fontWeight: 800, fontSize: '1.2rem', textAlign: 'center', lineHeight: 1.1 }}>{match.homeTeam?.name || 'Home'}</span>
                     {(isLive || match.status === 'Finished') && (
                         <span style={{ fontSize: '2.5rem', fontWeight: 900, marginTop: '0.5rem', color: isLive ? 'var(--accent)' : 'var(--accent)' }}>
-                            {match.homeTeam.score}
+                            {match.homeTeam?.score}
                         </span>
                     )}
                 </div>
@@ -98,10 +79,10 @@ const MatchCard = ({ match }: { match: MatchProps }) => {
 
                 <div className="team" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
                     <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', padding: '10px', background: 'transparent' }}>
-                        {match.awayTeam.logo ? (
+                        {match.awayTeam?.logo ? (
                             <Image
                                 src={match.awayTeam.logo}
-                                alt={match.awayTeam.name}
+                                alt={match.awayTeam.name || 'Away Team'}
                                 fill
                                 sizes="80px"
                                 style={{ objectFit: 'contain' }}
@@ -119,14 +100,14 @@ const MatchCard = ({ match }: { match: MatchProps }) => {
                                     fontWeight: 900,
                                 }}
                             >
-                                {(match.awayTeam.name?.[0] ?? 'A').toUpperCase()}
+                                {(match.awayTeam?.name?.[0] ?? 'A').toUpperCase()}
                             </div>
                         )}
                     </div>
-                    <span style={{ fontWeight: 800, fontSize: '1.2rem', textAlign: 'center', lineHeight: 1.1 }}>{match.awayTeam.name}</span>
+                    <span style={{ fontWeight: 800, fontSize: '1.2rem', textAlign: 'center', lineHeight: 1.1 }}>{match.awayTeam?.name || 'Away'}</span>
                     {(isLive || match.status === 'Finished') && (
                         <span style={{ fontSize: '2.5rem', fontWeight: 900, marginTop: '0.5rem', color: isLive ? 'var(--accent)' : 'var(--accent)' }}>
-                            {match.awayTeam.score}
+                            {match.awayTeam?.score}
                         </span>
                     )}
                 </div>

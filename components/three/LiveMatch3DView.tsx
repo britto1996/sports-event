@@ -68,15 +68,15 @@ function PlayerToken({
 
 function StatBoard({ match }: { match: MatchEvent }) {
   const minute = match.minute ?? "";
-  const scoreHome = match.homeTeam.score ?? 0;
-  const scoreAway = match.awayTeam.score ?? 0;
+  const scoreHome = match.homeTeam?.score ?? 0;
+  const scoreAway = match.awayTeam?.score ?? 0;
   const possHome = match.possession?.home;
   const possAway = match.possession?.away;
   const shotsHome = match.shots?.home;
   const shotsAway = match.shots?.away;
 
   const lines = [
-    `${match.homeTeam.name}  ${scoreHome} - ${scoreAway}  ${match.awayTeam.name}`,
+    `${match.homeTeam?.name || 'Home'}  ${scoreHome} - ${scoreAway}  ${match.awayTeam?.name || 'Away'}`,
     minute ? `Minute: ${minute}` : "Live",
     possHome != null && possAway != null ? `Possession: ${possHome}% / ${possAway}%` : "",
     shotsHome != null && shotsAway != null ? `Shots: ${shotsHome} / ${shotsAway}` : "",

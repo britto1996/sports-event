@@ -892,4 +892,90 @@ html[data-theme="light"] .drawer-overlay {
   .footer-bottom-right {
     justify-content: flex-start;
   }
+
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .slider-controls {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .slider-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
+
+/* Upcoming Events Slider */
+.upcoming-events-slider {
+  width: 100%;
+}
+
+.slider-content {
+  margin-bottom: 2rem;
+}
+
+.slider-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.slider-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-0);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slider-btn:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  background: var(--surface-1);
+}
+
+.slider-btn:active {
+  transform: translateY(0);
+}
+
+.slider-counter {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.slider-view-all {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  border: 2px solid var(--accent);
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.slider-view-all:hover {
+  background: var(--accent);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+

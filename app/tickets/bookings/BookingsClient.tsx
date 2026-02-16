@@ -1,19 +1,35 @@
 "use client";
 
-import { useAppSelector } from "@/lib/store/hooks";
-import { selectBookings, selectBookingsStatus } from "@/lib/store/bookingsSlice";
-import BookingCard from "@/components/BookingCard";
+import { getBookedTickets } from "@/lib/api/tickets";
+import type { Booking } from "@/types/mockData";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { links } from "@/constants/path";
-import { useEffect, useRef, useState } from "react";
+import BookingCard from "@/components/BookingCard";
 
 const ITEMS_PER_PAGE_DESKTOP = 9;
 const ITEMS_PER_BATCH_MOBILE = 10;
 const ITEMS_LOAD_MORE_MOBILE = 5;
 
 export default function BookingsClient() {
-    const bookings = useAppSelector(selectBookings);
-    const status = useAppSelector(selectBookingsStatus);
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [status, setStatus] = useState<'idle' | 'loading' | 'succeeded' | 'failed'>('idle');
+
+    useEffect(() => {
+        const fetchBookings = async () => {
+            setStatus('loading');
+            try {
+                const data = await getBookedTickets();
+                setBookings(data);
+                setStatus('succeeded');
+            } catch (error) {
+                console.error("Failed to fetch tickets:", error);
+                setStatus('failed');
+            }
+        };
+
+        fetchBookings();
+    }, []);
 
     // Pagination state for desktop
     const [currentPage, setCurrentPage] = useState(1);
@@ -61,6 +77,16 @@ export default function BookingsClient() {
             <div className="container" style={{ padding: "8rem 2rem", textAlign: "center" }}>
                 <p style={{ color: "var(--muted)", fontWeight: 700, fontSize: "1.1rem" }}>
                     Loading your bookings...
+                </p>
+            </div>
+        );
+    }
+
+    if (status === "failed") {
+        return (
+            <div className="container" style={{ padding: "8rem 2rem", textAlign: "center" }}>
+                <p style={{ color: "var(--muted)", fontWeight: 700, fontSize: "1.1rem" }}>
+                    Failed to load bookings. Please try again later.
                 </p>
             </div>
         );

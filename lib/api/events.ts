@@ -128,16 +128,14 @@ const normalizeEvent = (value: unknown, index: number): MatchEvent | null => {
     asString(obj.title) ??
     asString(obj.name) ??
     asString(obj.matchTitle) ??
-    `${
-      asString(asRecord(teams?.home)?.name) ??
-      asString(obj.homeTeam) ??
-      asString(obj.homeTeamName) ??
-      "Home"
-    } vs ${
-      asString(asRecord(teams?.away)?.name) ??
-      asString(obj.awayTeam) ??
-      asString(obj.awayTeamName) ??
-      "Away"
+    `${asString(asRecord(teams?.home)?.name) ??
+    asString(obj.homeTeam) ??
+    asString(obj.homeTeamName) ??
+    "Home"
+    } vs ${asString(asRecord(teams?.away)?.name) ??
+    asString(obj.awayTeam) ??
+    asString(obj.awayTeamName) ??
+    "Away"
     }`;
 
   const competition =
@@ -165,10 +163,10 @@ const normalizeEvent = (value: unknown, index: number): MatchEvent | null => {
 
   const status = normalizeStatus(
     asRecord(fixture?.status)?.short ??
-      asRecord(fixture?.status)?.long ??
-      obj.status ??
-      obj.state ??
-      obj.matchStatus
+    asRecord(fixture?.status)?.long ??
+    obj.status ??
+    obj.state ??
+    obj.matchStatus
   );
 
   const elapsed = asNumber(asRecord(fixture?.status)?.elapsed);
@@ -322,4 +320,110 @@ export const fetchMatchEvents = async (): Promise<MatchEvent[]> => {
   }
 
   throw new Error(getApiErrorMessage(new Error("No events returned from API")));
+};
+
+
+/**
+ * Sync events from external source
+ * POST /events/sync
+ */
+export const syncEvents = async (): Promise<MatchEvent[]> => {
+  const url = `http://localhost:8000/api/events/sync`;
+
+  try {
+    // Get current date in YYYY-MM-DD format (UTC)
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    console.log('[syncEvents] Calling API:', url);
+    console.log('[syncEvents] Payload:', { date: currentDate });
+
+    // Use axios directly to bypass apiClient's base URL configuration
+    const axios = (await import('axios')).default;
+
+    const res = await axios.post(url, {
+      date: currentDate
+    }, {
+      timeout: 15000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const list = extractArray(res.data);
+    const normalized = list
+      .map((item, i) => normalizeEvent(item, i))
+      .filter((e): e is MatchEvent => Boolean(e));
+
+    return normalized;
+  } catch (e) {
+    if ((e as any)?.response) {
+      console.error('[syncEvents] Response error:', {
+        status: (e as any).response.status,
+        data: (e as any).response.data,
+      });
+    }
+
+    const errorMessage = getApiErrorMessage(e);
+    console.error('[syncEvents] Error message:', errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+
+/**
+ * Fetch events from the server with optional limit
+ * GET /events?limit=X
+ */
+export const fetchEvents = async (limit?: number): Promise<MatchEvent[]> => {
+  const url = `http://localhost:8000/api/events${limit ? `?limit=${limit}` : ''}`;
+
+  try {
+    console.log('[fetchEvents] Calling API:', url);
+
+    const axios = (await import('axios')).default;
+    const res = await axios.get(url, {
+      timeout: 15000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('[fetchEvents] Response status:', res.status);
+    console.log('[fetchEvents] Response data:', res.data);
+
+    const list = extractArray(res.data);
+    console.log('[fetchEvents] Extracted array length:', list.length);
+
+    const normalized = list
+      .map((item, i) => normalizeEvent(item, i))
+      .filter((e): e is MatchEvent => Boolean(e));
+
+    console.log('[fetchEvents] Normalized events:', normalized.length);
+
+    return normalized;
+  } catch (e) {
+    console.error('[fetchEvents] Error occurred:', e);
+
+    if ((e as any)?.response) {
+      console.error('[fetchEvents] Response error:', {
+        status: (e as any).response.status,
+        data: (e as any).response.data,
+      });
+    }
+
+    const errorMessage = getApiErrorMessage(e);
+    console.error('[fetchEvents] Error message:', errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+export const getEventById = async (id: string): Promise<MatchEvent | null> => {
+  try {
+    const axios = (await import('axios')).default;
+    const res = await axios.get(`http://localhost:8000/api/events/${id}`);
+    return normalizeEvent(res.data, 0);
+  } catch (e) {
+    console.error("Failed to fetch event by ID", e);
+    return null;
+  }
 };

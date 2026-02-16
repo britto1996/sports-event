@@ -1,8 +1,8 @@
 export type MatchStatus = 'Upcoming' | 'Live' | 'Finished';
 
 export interface Team {
-	name: string;
-	logo: string;
+	name?: string;
+	logo?: string;
 	/** Present for Live/Finished in our mock data */
 	score?: number;
 }
@@ -14,8 +14,8 @@ export interface MatchEvent {
 	date: string;
 	venue: string;
 	status: MatchStatus;
-	homeTeam: Team;
-	awayTeam: Team;
+	homeTeam?: Team;
+	awayTeam?: Team;
 
 	// Ticketing
 	ticketsAvailable?: boolean;

@@ -11,6 +11,8 @@ import { bookingAdded, selectBookedSeatIds } from '@/lib/store/bookingsSlice';
 import { toastAdded } from '@/lib/store/toastSlice';
 import { links } from '@/constants/path';
 import { generateBookingReference, generateBookingQRCode } from '@/lib/qrCodeUtils';
+import { createCheckout } from '@/lib/api/tickets';
+import type { CheckoutResponse } from '@/lib/api/tickets';
 
 const mockData = mockDataRaw as MockData;
 
@@ -23,6 +25,7 @@ export default function EventBooking({ event }: EventBookingProps) {
     const dispatch = useAppDispatch();
     const auth = useAppSelector((s) => s.auth);
     const isAuthed = auth.status === 'authenticated' && !!auth.token;
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const tiers = mockData.tickets;
     const defaultTier = tiers.find((t) => t.type === 'Standard') ?? tiers[0];
@@ -236,68 +239,60 @@ export default function EventBooking({ event }: EventBookingProps) {
                                 color: selectedSeats.length > 0 && isAuthed ? 'var(--primary-inv)' : 'var(--muted)',
                                 border: `1px solid ${selectedSeats.length > 0 && isAuthed ? 'transparent' : 'var(--border-subtle)'}`,
                             }}
-                            disabled={selectedSeats.length === 0 || !isAuthed}
+                            disabled={selectedSeats.length === 0 || !isAuthed || isProcessing}
                             onClick={async () => {
                                 if (!isAuthed) {
                                     redirectToLogin();
                                     return;
                                 }
 
-                                try {
-                                    // Generate booking reference and QR code
-                                    const bookingId = `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                                    const bookingReference = generateBookingReference();
-                                    const timestamp = new Date().toISOString();
-                                    const seatIds = selectedSeats.map(seat => seat.id);
+                                setIsProcessing(true);
 
-                                    const qrCode = await generateBookingQRCode(
-                                        bookingId,
-                                        event.id,
-                                        seatIds,
-                                        timestamp
+                                try {
+                                    // 1. Create Checkout / Booking via API
+                                    // We process seats one by one or batch if API supported it. 
+                                    // The prompt implies a single payload: { eventId, seatNo, amount }
+                                    // But we allow multiple seats. We'll loop for now or assume backend handles one.
+                                    // Let's assume we iterate and book, or better:
+                                    // If the user selected multiple seats, we should probably call it for each or verify API.
+                                    // The requirement: { "eventId": "...", "seatNo": "A12", "amount": 50 }
+
+                                    // We will process all selected seats.
+                                    const bookingPromises = selectedSeats.map(seat =>
+                                        createCheckout({
+                                            eventId: event.id,
+                                            seatNo: `Row ${seat.row}, Seat ${seat.number}`,
+                                            amount: seat.price,
+                                            tierType: selectedTier.type
+                                        })
                                     );
 
-                                    // Create booking
-                                    const booking = {
-                                        id: bookingId,
-                                        eventId: event.id,
-                                        eventTitle: event.title,
-                                        eventDate: event.date,
-                                        venue: event.venue,
-                                        tierType: selectedTier.type,
-                                        seats: selectedSeats.map(seat => ({
-                                            id: seat.id,
-                                            row: seat.row,
-                                            number: seat.number.toString(),
-                                            price: seat.price,
-                                            typeLabel: seat.typeLabel,
-                                        })),
-                                        totalPrice: totalPrice,
-                                        bookedAt: timestamp,
-                                        status: 'confirmed' as const,
-                                        qrCode,
-                                        bookingReference,
-                                    };
+                                    await Promise.all(bookingPromises);
 
-                                    dispatch(bookingAdded(booking));
+                                    // 2. Clear Cart & Notify
                                     dispatch(cartEventCleared({ eventId: event.id }));
+                                    setSelectedSeats([]);
+
                                     dispatch(toastAdded({
-                                        message: `Successfully booked ${selectedSeats.length} ticket${selectedSeats.length !== 1 ? 's' : ''} for ${event.title}!`,
+                                        message: `Successfully booked ${selectedSeats.length} ticket${selectedSeats.length !== 1 ? 's' : ''}!`,
                                         type: 'success',
                                     }));
 
-                                    // Redirect to bookings page
+                                    // 3. Redirect to Tickets Page (where they will be fetched via API)
                                     router.push(links.bookings);
+
                                 } catch (error) {
                                     console.error('Booking error:', error);
                                     dispatch(toastAdded({
                                         message: 'Failed to complete booking. Please try again.',
                                         type: 'error',
                                     }));
+                                } finally {
+                                    setIsProcessing(false);
                                 }
                             }}
                         >
-                            {isAuthed ? `CHECKOUT (${selectedSeats.length})` : 'LOGIN TO CHECKOUT'}
+                            {isProcessing ? 'PROCESSING...' : (isAuthed ? `CHECKOUT (${selectedSeats.length})` : 'LOGIN TO CHECKOUT')}
                         </button>
 
                         <div style={{

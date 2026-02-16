@@ -5,6 +5,7 @@ import { Provider } from "react-redux";
 import { makeStore, type AppStore } from "@/lib/store/store";
 import ToastContainer from "@/components/ToastContainer";
 import AuthHydrator from "@/components/AuthHydrator";
+import { AuthProvider } from "@/components/AuthProvider";
 
 export default function ReduxProvider({ children }: PropsWithChildren) {
   const storeRef = useRef<AppStore | null>(null);
@@ -14,9 +15,11 @@ export default function ReduxProvider({ children }: PropsWithChildren) {
 
   return (
     <Provider store={storeRef.current}>
-      <AuthHydrator />
-      {children}
-      <ToastContainer />
+      <AuthProvider>
+        <AuthHydrator />
+        {children}
+        <ToastContainer />
+      </AuthProvider>
     </Provider>
   );
 }
